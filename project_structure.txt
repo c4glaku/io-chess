@@ -1,0 +1,24 @@
+chess-cpp/
+├── include
+    └── utils.h
+├── src
+    ├── board
+    │   ├── GameBoard.cpp
+    │   └── GameBoard.h
+    ├── pieces
+    │   ├── Bishop.cpp
+    │   ├── Bishop.h
+    │   ├── ChessPiece.h
+    │   ├── King.cpp
+    │   ├── King.h
+    │   ├── Knight.cpp
+    │   ├── Knight.h
+    │   ├── Pawn.cpp
+    │   ├── Pawn.h
+    │   ├── Queen.cpp
+    │   ├── Queen.h
+    │   ├── Rook.cpp
+    │   └── Rook.h
+    └── main.cpp
+├── CMakeLists.txt
+└── README.md
