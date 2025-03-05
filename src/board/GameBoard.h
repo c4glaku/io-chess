@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <SFML/Graphics.hpp>
 #include "../pieces/ChessPiece.h"
 
 struct StoreMove {
@@ -23,12 +24,14 @@ private:
     bool isSquareAttacked(int row, int col) const;
     bool validateCastling(int row, int col, int destCol);
     void performCastling(int row, int col, int destCol);
+    std::map<std::string, sf::Texture> pieceTextures;
     
 public:
     GameBoard();
     ~GameBoard();
 
     void init();
+    void loadTextures();
     void togglePlayer();
     std::string Player() const;
     bool validMove(int start_row, int start_col, int dest_row, int dest_col) const;
@@ -43,9 +46,10 @@ public:
 
     const std::vector<std::vector<ChessPiece*>>& getBoard() const { return ChessBoard; }
 
-    void displayBoard() const;
+    void draw(sf::RenderWindow& window);
+    // void displayBoard() const;
 };
 
-void displayChessboard(const std::vector<std::vector<ChessPiece*>> &chessboard);
+// void displayChessboard(const std::vector<std::vector<ChessPiece*>> &chessboard);
 
 #endif

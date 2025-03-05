@@ -48,6 +48,66 @@ void GameBoard::init() {
         ChessBoard[1][i] = new ChessPiece("White", 1, i, PieceType::PAWN);
         ChessBoard[6][i] = new ChessPiece("Black", 6, i, PieceType::PAWN);
     }
+
+    loadTextures();
+}
+
+void GameBoard::loadTextures() {
+    std::vector<std::pair<std::string, std::string>> pieceFiles = {
+        {"w_king", "../resources/w_king.png"},
+        {"b_king", "../resources/b_king.png"},
+        {"w_queen", "../resources/w_queen.png"},
+        {"b_queen", "../resources/b_queen.png"},
+        {"w_rook", "../resources/w_rook.png"},
+        {"b_rook", "../resources/b_rook.png"},
+        {"w_bishop", "../resources/w_bishop.png"},
+        {"b_bishop", "../resources/b_bishop.png"},
+        {"w_knight", "../resources/w_knight.png"},
+        {"b_knight", "../resources/b_knight.png"},
+        {"w_pawn", "../resources/w_pawn.png"},
+        {"b_pawn", "../resources/b_pawn.png"}
+    };
+
+    for (const auto& [key, path] : pieceFiles) {
+        sf::Texture texture;
+        if (!texture.loadFromFile(path)) {
+            std::cerr << "Failed to load " << path << std::endl;
+            continue;
+        }
+        pieceTextures[key] = texture;
+    }
+}
+
+void GameBoard::draw(sf::RenderWindow& window) {
+    const float squareSize = 64.0f; // Adjust based on PNG size;
+    sf::RectangleShape square(sf::Vector2f(squareSize, squareSize));
+
+    // Draw the board
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            square.setPosition(j * squareSize, (7 - i) * squareSize); // Flip row for bottom-left origin 
+            square.setFillColor((i + j) % 2 == 0 ? sf::Color(240, 217, 181) : sf::Color(181, 136, 99));
+            window.draw(square);
+
+            // Draw Piece if present
+            if (ChessBoard[i][j]) {
+                std::string key = (ChessBoard[i][j]->getColour() == "White" ? "w_" : "b_");
+                switch (ChessBoard[i][j]->getPieceType()) {
+                    case PieceType::KING: key += "king"; break;
+                    case PieceType::QUEEN: key += "queen"; break;
+                    case PieceType::ROOK: key += "rook"; break;
+                    case PieceType::BISHOP: key += "bishop"; break;
+                    case PieceType::KNIGHT: key += "knight"; break;
+                    case PieceType::PAWN: key += "pawn"; break;
+                    default: continue;
+                }
+                sf::Sprite pieceSprite;
+                pieceSprite.setTexture(pieceTextures[key]);
+                pieceSprite.setPosition(j * squareSize, (7 - i) * squareSize);
+                window.draw(pieceSprite);
+            }
+        }
+    }
 }
 
 void GameBoard::togglePlayer() {
@@ -331,6 +391,7 @@ void GameBoard::promotePawn(int row, int col, char promoteTo) {
     ChessBoard[row][col] = newPiece;
 }
 
+/*
 void GameBoard::displayBoard() const {
     displayChessboard(ChessBoard);
 }
@@ -349,3 +410,5 @@ void displayChessboard(const std::vector<std::vector<ChessPiece*>> &chessboard) 
     std::cout << "\n";
     std::cout << "  abcdefgh" << std::endl;
 }
+
+*/

@@ -1,3 +1,0 @@
-C:/Users/cagla/Desktop/Projects/chess-cpp/build/CMakeFiles/chess.dir
-C:/Users/cagla/Desktop/Projects/chess-cpp/build/CMakeFiles/edit_cache.dir
-C:/Users/cagla/Desktop/Projects/chess-cpp/build/CMakeFiles/rebuild_cache.dir

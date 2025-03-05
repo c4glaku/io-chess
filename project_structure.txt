@@ -1,24 +1,83 @@
 chess-cpp/
+├── build
+    ├── CMakeFiles
+    │   ├── 4.0.0-rc2
+    │   │   ├── CompilerIdC
+    │   │   │   ├── tmp
+    │   │   │   ├── CMakeCCompilerId.c
+    │   │   │   └── a.exe
+    │   │   ├── CompilerIdCXX
+    │   │   │   ├── tmp
+    │   │   │   ├── CMakeCXXCompilerId.cpp
+    │   │   │   └── a.exe
+    │   │   ├── CMakeCCompiler.cmake
+    │   │   ├── CMakeCXXCompiler.cmake
+    │   │   ├── CMakeDetermineCompilerABI_C.bin
+    │   │   ├── CMakeDetermineCompilerABI_CXX.bin
+    │   │   ├── CMakeRCCompiler.cmake
+    │   │   └── CMakeSystem.cmake
+    │   ├── chess_cpp.dir
+    │   │   ├── src
+    │   │   │   ├── board
+    │   │   │   │   ├── GameBoard.cpp.obj
+    │   │   │   │   └── GameBoard.cpp.obj.d
+    │   │   │   ├── pieces
+    │   │   │   │   ├── ChessPiece.cpp.obj
+    │   │   │   │   └── ChessPiece.cpp.obj.d
+    │   │   │   ├── main.cpp.obj
+    │   │   │   └── main.cpp.obj.d
+    │   │   ├── DependInfo.cmake
+    │   │   ├── build.make
+    │   │   ├── cmake_clean.cmake
+    │   │   ├── compiler_depend.internal
+    │   │   ├── compiler_depend.make
+    │   │   ├── compiler_depend.ts
+    │   │   ├── depend.make
+    │   │   ├── flags.make
+    │   │   ├── includes_CXX.rsp
+    │   │   ├── link.txt
+    │   │   ├── linkLibs.rsp
+    │   │   ├── objects.a
+    │   │   ├── objects1.rsp
+    │   │   └── progress.make
+    │   ├── pkgRedirects
+    │   ├── CMakeConfigureLog.yaml
+    │   ├── CMakeDirectoryInformation.cmake
+    │   ├── InstallScripts.json
+    │   ├── Makefile.cmake
+    │   ├── Makefile2
+    │   ├── TargetDirectories.txt
+    │   ├── cmake.check_cache
+    │   └── progress.marks
+    ├── CMakeCache.txt
+    ├── Makefile
+    ├── chess_cpp.exe
+    └── cmake_install.cmake
+├── chess-cpp
 ├── include
     └── utils.h
+├── resources
+    ├── README.md
+    ├── Roboto-VariableFont_wdth,wght.ttf
+    ├── b_bishop.png
+    ├── b_king.png
+    ├── b_knight.png
+    ├── b_pawn.png
+    ├── b_queen.png
+    ├── b_rook.png
+    ├── w_bishop.png
+    ├── w_king.png
+    ├── w_knight.png
+    ├── w_pawn.png
+    ├── w_queen.png
+    └── w_rook.png
 ├── src
     ├── board
     │   ├── GameBoard.cpp
     │   └── GameBoard.h
     ├── pieces
-    │   ├── Bishop.cpp
-    │   ├── Bishop.h
-    │   ├── ChessPiece.h
-    │   ├── King.cpp
-    │   ├── King.h
-    │   ├── Knight.cpp
-    │   ├── Knight.h
-    │   ├── Pawn.cpp
-    │   ├── Pawn.h
-    │   ├── Queen.cpp
-    │   ├── Queen.h
-    │   ├── Rook.cpp
-    │   └── Rook.h
+    │   ├── ChessPiece.cpp
+    │   └── ChessPiece.h
     └── main.cpp
 ├── CMakeLists.txt
 └── README.md
