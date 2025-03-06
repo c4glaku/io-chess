@@ -46,7 +46,7 @@ public:
 
     const std::vector<std::vector<ChessPiece*>>& getBoard() const { return ChessBoard; }
 
-    void draw(sf::RenderWindow& window);
+    void draw(sf::RenderWindow& window, float squareSize = 64.0f, float boardStartX = 0.0f, float boardStaryY = 0.0f);
     // void displayBoard() const;
 };
 

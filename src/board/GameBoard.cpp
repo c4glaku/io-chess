@@ -78,14 +78,14 @@ void GameBoard::loadTextures() {
     }
 }
 
-void GameBoard::draw(sf::RenderWindow& window) {
-    const float squareSize = 64.0f; // Adjust based on PNG size;
+void GameBoard::draw(sf::RenderWindow& window, float squareSize, float boardStartX, float boardStartY) {
     sf::RectangleShape square(sf::Vector2f(squareSize, squareSize));
 
     // Draw the board
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
-            square.setPosition(j * squareSize, (7 - i) * squareSize); // Flip row for bottom-left origin 
+            // position squares with offset for centering
+            square.setPosition(boardStartX + j * squareSize, boardStartY + (7 - i) * squareSize); 
             square.setFillColor((i + j) % 2 == 0 ? sf::Color(240, 217, 181) : sf::Color(181, 136, 99));
             window.draw(square);
 
@@ -103,7 +103,13 @@ void GameBoard::draw(sf::RenderWindow& window) {
                 }
                 sf::Sprite pieceSprite;
                 pieceSprite.setTexture(pieceTextures[key]);
-                pieceSprite.setPosition(j * squareSize, (7 - i) * squareSize);
+
+                // scale sprite to fit the square size
+                float spriteScale = squareSize / 64.0f;
+                pieceSprite.setScale(spriteScale, spriteScale);
+
+                // position the sprite with board offset
+                pieceSprite.setPosition(boardStartX + j * squareSize, boardStartY + (7 - i) * squareSize);
                 window.draw(pieceSprite);
             }
         }

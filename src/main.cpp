@@ -3,8 +3,10 @@
 #include <iostream>
 
 int main() {
-    // Initialize SFML window
-    sf::RenderWindow window(sf::VideoMode(512, 512), "Chess"); // 8x64 pixels
+    // Initialize SFML window with default size, while also allowing resizing
+    unsigned int initialWidth = 512;
+    unsigned int initialHeight = 512;
+    sf::RenderWindow window(sf::VideoMode(initialWidth, initialHeight), "Chess", sf::Style::Resize); // 8x64 pixels
     window.setFramerateLimit(60);
 
     GameBoard chess;
@@ -14,7 +16,8 @@ int main() {
     bool isCheck = false;
     bool isCheckMate = false;
     int selectedRow = -1, selectedCol = -1;
-    const float squareSize = 64.0f;
+    float squareSize = 64.0f; // initial square size
+    float boardScale = 1.0f; // initial scale factor for the board
 
     sf::Font font;
     if (!font.loadFromFile("../resources/Roboto-VariableFont_wdth,wght.ttf")) {
@@ -36,24 +39,61 @@ int main() {
                 window.close();
             }
 
+            // window resize handler
+            if (event.type == sf::Event::Resized) {
+                // calculate new dimensions
+                float aspectRatio = 1.0f;
+                unsigned int width = event.size.width;
+                unsigned int height = event.size.height;
+                float minDimension = std::min(width, height);
+
+                // update viewposrt
+                sf::FloatRect visibleArea(0, 0, width, height);
+                window.setView(sf::View(visibleArea));
+
+                // calculate new square size
+                squareSize = minDimension / 8.0f;
+                boardScale = minDimension / 512.0f;
+
+                // update highlight square size
+                highlightSquare.setSize(sf::Vector2f(squareSize, squareSize));
+
+                // adjust status text position
+                statusText.setPosition(10, 10);
+            }
+
             if (!isGameOver) {
                 if (event.type == sf::Event::MouseButtonPressed) {
                     if (event.mouseButton.button == sf::Mouse::Left) {
-                        // Precise coordinate calculation
-                        int mouseY = event.mouseButton.y;
-                        int mouseX = event.mouseButton.x;
+                        // get mouse coordinates
+                        float mouseY = event.mouseButton.y;
+                        float mouseX = event.mouseButton.x;
 
-                        // Ensure coordinates are within window
-                        if (mouseX >= 0 && mouseX < 512 && mouseY >= 0 && mouseY < 512) {
-                            // Flipped coordinate calculation
-                            int col = mouseX / squareSize;
-                            int row = 7 - (mouseY / squareSize);
+                        // debugging
+                        std::cout << "Clicked on coordinate: (" << mouseX << ", " << mouseY << std::endl;
 
-                            std::cout << "Raw Click - MouseY: " << mouseY 
-                                    << ", Calculated Row: " << row 
-                                    << ", Column: " << col << std::endl;
+                        // calculate board dimensions based on current window size
+                        float minDimension = std::min(window.getSize().x, window.getSize().y);
+                        float currentSquareSize = minDimension / 8.0f;
 
-                            // First click: Select a piece
+                        // calculate board boundaries
+                        float boardSize = currentSquareSize * 8.0f;
+                        float boardStartX = (window.getSize().x - boardSize) / 2.0f;
+                        float boardStartY = (window.getSize().y - boardSize) / 2.0f;
+
+                        // check if the coordinates are within window
+                        if (mouseX >= boardStartX && mouseX < boardStartX + boardSize &&
+                            mouseY >= boardStartY && mouseY < boardStartY + boardSize) {
+                            
+                            // calculate coordinates
+                            int col = (mouseX - boardStartX) / currentSquareSize;
+                            int row = 7 - (int)((mouseY - boardStartY) / currentSquareSize); // flip y coordinate
+                            
+                            // debugging
+                            std::cout << "Calculated board position: row " << row << ", col " << col << std::endl;
+
+
+                            // first click: select a piece
                             if (selectedRow == -1) {
                                 if (chess.isValidPieceSelection(row, col)) {
                                     selectedRow = row;
@@ -64,7 +104,7 @@ int main() {
                                     std::cout << "Invalid piece selection" << std::endl;
                                 }
                             } 
-                            // Second click: Attempt to move the piece
+                            // second click: attempt to move the piece
                             else {
                                 std::cout << "Attempting to move from (" 
                                         << selectedRow << "," << selectedCol 
@@ -82,7 +122,7 @@ int main() {
                                         }
                                     }
 
-                                    // Basic pawn promotion (always to Queen)
+                                    // basic pawn promotion (always to Queen)
                                     if ((chess.getBoard()[row][col]->getSymbol() == 'P' && row == 7) ||
                                         (chess.getBoard()[row][col]->getSymbol() == 'p' && row == 0)) {
                                         chess.promotePawn(row, col, 'Q');
@@ -91,7 +131,7 @@ int main() {
                                     std::cout << "Move failed" << std::endl;
                                 }
                                 
-                                // Reset selection
+                                // reset selection
                                 selectedRow = -1;
                                 selectedCol = -1;
                             }
@@ -99,7 +139,7 @@ int main() {
                     }
                 }
 
-                // Undo move
+                // undo move
                 if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::U) {
                     chess.undo();
                     chess.togglePlayer();
@@ -109,7 +149,7 @@ int main() {
             }
         }
 
-        // Update status text
+        // update status text
         if (isCheckMate) {
             statusText.setString(std::string("Checkmate! ") + (chess.Player() == "White" ? "Black" : "White") + " wins!");
         } else if (isCheck) {
@@ -118,13 +158,26 @@ int main() {
             statusText.setString(chess.Player() + "'s turn");
         }
 
-        // Render
-        window.clear();
-        chess.draw(window);
+        // render
+        window.clear(sf::Color(240, 240, 240));
 
-        // Draw highlight for selected piece
+        // calculate board position
+        float boardSize = squareSize * 8.0f;
+        float boardStartX = (window.getSize().x - boardSize) / 2.0f;
+        float boardStartY = (window.getSize().y - boardSize) / 2.0f;
+
+        // create a view for the board
+        sf::View boardView = window.getDefaultView();
+        boardView.setCenter(window.getSize().x / 2.0f, window.getSize().y / 2.0f);
+        window.setView(boardView);
+
+        // draw the board
+        chess.draw(window, squareSize, boardStartX, boardStartY);
+
+        // draw highlight for selected piece
         if (selectedRow != -1 && selectedCol != -1) {
-            highlightSquare.setPosition(selectedCol * squareSize, (7 - selectedRow) * squareSize);
+            highlightSquare.setPosition(boardStartX + selectedCol * squareSize, 
+                                        boardStartY + (7 - selectedRow) * squareSize);
             window.draw(highlightSquare);
         }
 
