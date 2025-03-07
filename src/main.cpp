@@ -42,7 +42,6 @@ int main() {
             // window resize handler
             if (event.type == sf::Event::Resized) {
                 // calculate new dimensions
-                float aspectRatio = 1.0f;
                 unsigned int width = event.size.width;
                 unsigned int height = event.size.height;
                 float minDimension = std::min(width, height);
@@ -53,7 +52,7 @@ int main() {
 
                 // calculate new square size
                 squareSize = minDimension / 8.0f;
-                boardScale = minDimension / 512.0f;
+                // boardScale = minDimension / 512.0f;
 
                 // update highlight square size
                 highlightSquare.setSize(sf::Vector2f(squareSize, squareSize));

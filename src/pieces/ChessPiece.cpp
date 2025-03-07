@@ -61,7 +61,7 @@ bool ChessPiece::isValidMove(int destRow, int destCol,
 
     switch(type) {
         case PieceType::KING:
-            // Basic moves + castling flag
+            // basic king moves + castling flag
             return (dx <= 1 && dy <= 1) || (!hasMoved && dy == 0 && dx == 2);
             
         case PieceType::QUEEN:
@@ -81,7 +81,7 @@ bool ChessPiece::isValidMove(int destRow, int destCol,
             bool initial = (colour == "White" && row == 1) || (colour == "Black" && row == 6);
 
             if (checkAttack) {
-                // Pawns attack diagonally
+                // pawns attack diagonally
                 return (dx == 1 && destRow == row + dir);
             } else {
                 // Regular move

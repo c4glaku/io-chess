@@ -128,61 +128,70 @@ std::string GameBoard::Player() const {
     return currentPlayer;
 }
 
-bool GameBoard::validMove(int start_row, int start_col, int dest_row, int dest_col) const {
+bool GameBoard::validMove(int startRow, int startCol, int destRow, int destCol) const {
     // Check coordinates' validity
-    if (start_row < 0 || start_row > 7 || start_col < 0 || start_col > 7 ||
-        dest_row < 0 || dest_row > 7 || dest_col < 0 || dest_col > 7) {
+    if (startRow < 0 || startRow > 7 || startCol < 0 || startCol > 7 ||
+        destRow < 0 || destRow > 7 || destCol < 0 || destCol > 7) {
             return false;
     }
 
     // Check if a piece is at the starting position
-    if (!ChessBoard[start_row][start_col]) {
+    if (!ChessBoard[startRow][startCol]) {
         return false;
     }
 
     // Check if the piece belongs to the current player
-    if (ChessBoard[start_row][start_col]->getColour() != currentPlayer) {
+    if (ChessBoard[startRow][startCol]->getColour() != currentPlayer) {
         return false;
     }
 
     // Check move legality
-    return ChessBoard[start_row][start_col]->isValidMove(dest_row, dest_col, ChessBoard);
+    return ChessBoard[startRow][startCol]->isValidMove(destRow, destCol, ChessBoard);
 }
 
-bool GameBoard::movePiece(int start_row, int start_col, int dest_row, int dest_col) {
-    if (!validMove(start_row, start_col, dest_row, dest_col)) return false;
+bool GameBoard::movePiece(int startRow, int startCol, int destRow, int destCol) {
+    if (!validMove(startRow, startCol, destRow, destCol)) return false;
     
+    ChessPiece* piece = ChessBoard[startRow][startCol];
 
-    ChessPiece* piece = ChessBoard[start_row][start_col];
-    if (piece->getPieceType() == PieceType::KING && abs(dest_col - start_col) == 2) {
-        if (!validateCastling(start_row, start_col, dest_col)) return false;
+    if (piece->getPieceType() == PieceType::KING && abs(destCol - startCol) == 2) {
+        if (!validateCastling(startRow, startCol, destCol)) return false;
 
-        performCastling(start_row, start_col, dest_col);
+        performCastling(startRow, startCol, destCol);
         return true;
     }
 
     ChessPiece* capturedPiece = nullptr;
     isCapture = false;
 
-    if (ChessBoard[dest_row][dest_col]) {
+    if (ChessBoard[destRow][destCol]) {
+        // cannot capture a king
+        if (ChessBoard[destRow][destCol]->getPieceType() == PieceType::KING) {
+            return false;
+        }
         isCapture = true;
-        capturedPiece = ChessBoard[dest_row][dest_col];
+        capturedPiece = ChessBoard[destRow][destCol];
     }
 
+    // make move
+    ChessPiece* movingPiece = ChessBoard[startRow][startCol];
+    ChessBoard[startRow][startCol] = nullptr;
+    ChessBoard[destRow][destCol] = movingPiece;
+    int oldRow = movingPiece->getRow();
+    int oldCol = movingPiece->getCol();
+    movingPiece->setPosition(destRow, destCol);
 
-    ChessPiece* movingPiece = ChessBoard[start_row][start_col];
-    ChessBoard[start_row][start_col] = nullptr;
-    ChessBoard[dest_row][dest_col] = movingPiece;
-    movingPiece->setPosition(dest_row, dest_col);
+    // temporarily toggle player to check if the move would leave the player in check
+    std::string savedPlayer = currentPlayer;
+    currentPlayer = (currentPlayer == "White") ? "Black" : "White";
+    bool wouldBeInCheck = isCheck();
+    currentPlayer = savedPlayer;
 
-    bool inCheck = isCheck();
-
-    // undo the stored move if the current player is in check
-    if (inCheck) {
-        ChessBoard[start_row][start_col] = movingPiece;
-        movingPiece->setPosition(start_row, start_col);
-        ChessBoard[dest_row][dest_col] = capturedPiece;
-
+    // undo move if the player is left in a check after the move
+    if (wouldBeInCheck) {
+        ChessBoard[startRow][startCol] = movingPiece;
+        movingPiece->setPosition(oldRow, oldCol);
+        ChessBoard[destRow][destCol] = capturedPiece;
         return false;
     }
 
@@ -190,14 +199,14 @@ bool GameBoard::movePiece(int start_row, int start_col, int dest_row, int dest_c
         CapturedPieces.push_back(capturedPiece);
     }
 
-    addMove(start_row, start_col, dest_row, dest_col, capturedPiece);
+    addMove(startRow, startCol, destRow, destCol, capturedPiece);
 
-    // Promotion
+    // handle promotion
     if ((movingPiece->getPieceType() == PieceType::PAWN && 
-        (movingPiece->getColour() == "White" && dest_row == 7) ||
-        (movingPiece->getColour() == "Black" && dest_row == 0))) {
+        (movingPiece->getColour() == "White" && destRow == 7) ||
+        (movingPiece->getColour() == "Black" && destRow == 0))) {
             char promotionPiece = (movingPiece->getColour() == "White") ? 'Q' : 'q';
-            promotePawn(dest_row, dest_col, promotionPiece);
+            promotePawn(destRow, destCol, promotionPiece);
     }
 
     return true;
@@ -205,10 +214,14 @@ bool GameBoard::movePiece(int start_row, int start_col, int dest_row, int dest_c
 
 bool GameBoard::validateCastling(int row, int col, int destCol) {
     if (isCheck()) return false;
-    return true;
 
     int rookCol = (destCol > col) ? 7 : 0;
     int direction = (destCol > col) ? 1 : -1;
+
+    ChessPiece* king = ChessBoard[row][col];
+    if (!king || king->getPieceType() != PieceType::KING || king->getHasMoved() == true) {
+        return false;
+    }
 
     ChessPiece* rook = ChessBoard[row][rookCol];
     if (!rook || rook->getPieceType() != PieceType::ROOK || rook->getHasMoved()) return false;
@@ -244,11 +257,11 @@ void GameBoard::performCastling(int row, int col, int destCol) {
 }
 
 std::pair<int, int> GameBoard::kingPos() const {
-    std::string King = (currentPlayer == "White") ? "K" : "k";
-
     for (int x = 0; x < 8; ++x) {
         for (int y = 0; y < 8; ++y) {
-            if (ChessBoard[x][y] && ChessBoard[x][y]->getPieceType() == PieceType::KING) {
+            if (ChessBoard[x][y] && 
+                ChessBoard[x][y]->getPieceType() == PieceType::KING &&
+                ChessBoard[x][y]->getColour() == currentPlayer) {
                 return {x, y};
             }
         }
@@ -262,10 +275,12 @@ bool GameBoard::isCheck() const {
     auto [kingRow, kingCol] = kingPos();
     if (kingRow == -1) return false; // should not happen
 
+    std::string oppColour = (currentPlayer == "White") ? "Black" : "White";
+
     for (int x = 0; x < 8; ++x) {
         for (int y = 0; y < 8; ++y) {
-            if (ChessBoard[x][y] && (ChessBoard[x][y]->getColour() != currentPlayer)) {
-                if (ChessBoard[x][y]->isValidMove(kingRow, kingCol, ChessBoard)) {
+            if (ChessBoard[x][y] && (ChessBoard[x][y]->getColour() == oppColour)) {
+                if (ChessBoard[x][y]->isValidMove(kingRow, kingCol, ChessBoard, true)) {
                     return true;
                 }
             }
@@ -296,8 +311,8 @@ void GameBoard::undo() {
     }
 }
 
-void GameBoard::addMove(int start_row, int start_col, int dest_row, int dest_col, ChessPiece* captured) {
-    StoreMove newMove = {start_row, start_col, dest_row, dest_col, captured};
+void GameBoard::addMove(int startRow, int startCol, int destRow, int destCol, ChessPiece* captured) {
+    StoreMove newMove = {startRow, startCol, destRow, destCol, captured};
     ChessHistory.push_back(newMove);
 }
 
@@ -308,7 +323,7 @@ bool GameBoard::isSquareAttacked(int row, int col) const {
         for (int y = 0; y < 8; ++y) {
             ChessPiece* piece = ChessBoard[x][y];
             if (piece && piece->getColour() == oppColour) {
-                if (piece->isValidMove(row, col, ChessBoard, /*checkAttack=*/true)) {
+                if (piece->isValidMove(row, col, ChessBoard, true)) {
                     return true;
                 }
             }
@@ -320,42 +335,43 @@ bool GameBoard::isSquareAttacked(int row, int col) const {
 bool GameBoard::checkMate() {
     if (!isCheck()) return false;
 
-    // Exhaust all possible moves
+    // exhaust all possible moves
     for (int x = 0; x < 8; ++x) {
         for (int y = 0; y < 8; ++y) {
             if (ChessBoard[x][y] && ChessBoard[x][y]->getColour() == currentPlayer) {
-                std::vector<std::pair<int, int>> moves = ChessBoard[x][y]->getLegalMoves(ChessBoard);
+                for (int destCol = 0; destCol < 8; ++destCol) {
+                    for (int destRow = 0; destRow < 8; ++destRow) {
+                        if (validMove(x, y, destRow, destCol)) {
+                            // save current state
+                            ChessPiece* movingPiece = ChessBoard[x][y];
+                            ChessPiece* destPiece = ChessBoard[destRow][destCol];
 
-                for (std::pair<int, int> move : moves) {
-                    int destRow = move.first;
-                    int destCol = move.second;
+                            // try the move
+                            ChessBoard[x][y] = nullptr;
+                            ChessBoard[destRow][destCol] = movingPiece;
+                            int oldRow = movingPiece->getRow();
+                            int oldCol = movingPiece->getCol();
+                            movingPiece->setPosition(destRow, destCol);
 
-                    // Save current state of the baord
-                    ChessPiece* movingPiece = ChessBoard[x][y];
-                    ChessPiece* destPiece = ChessBoard[destRow][destCol];
+                            // check if player is in check after the move
+                            bool stillInCheck = isCheck();
 
-                    // Make the possible move
-                    ChessBoard[x][y] = nullptr;
-                    ChessBoard[destRow][destCol] = movingPiece;
-                    movingPiece->setPosition(destRow, destCol);
+                            // restore board
+                            ChessBoard[x][y] = movingPiece;
+                            movingPiece->setPosition(oldRow, oldCol);
+                            ChessBoard[destRow][destCol] = destPiece;
 
-                    // Update current check status after the possible move is played
-                    bool stillInCheck = isCheck();
-
-                    // Restore board status
-                    ChessBoard[x][y] = movingPiece;
-                    movingPiece->setPosition(x, y);
-                    ChessBoard[destRow][destCol] = destPiece;
-
-                    if (!stillInCheck) {
-                        return false;
+                            if (!stillInCheck) {
+                                return false; // player found a legal move to get out of check
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    return true;
+    return true; // no legal moves to get out of check
 }
 
 bool GameBoard::isValidPieceSelection(int row, int col) const {

@@ -1,8 +1,0 @@
-# personalized chess pieces
-resources/*
-
-# debugging and utility tools
-tree.py
-
-# complete build
-builds/*

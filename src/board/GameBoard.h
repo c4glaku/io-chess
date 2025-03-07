@@ -34,12 +34,12 @@ public:
     void loadTextures();
     void togglePlayer();
     std::string Player() const;
-    bool validMove(int start_row, int start_col, int dest_row, int dest_col) const;
-    bool movePiece(int start_row, int start_col, int dest_row, int dest_col);
+    bool validMove(int startRow, int startCol, int destRow, int destCol) const;
+    bool movePiece(int startRow, int startCol, int destRow, int destCol);
     std::pair<int, int> kingPos() const;
     bool isCheck() const;
     void undo();
-    void addMove(int start_row, int start_col, int dest_row, int dest_col, ChessPiece* captured = nullptr);
+    void addMove(int startRow, int startCol, int destRow, int destCol, ChessPiece* captured = nullptr);
     bool checkMate();
     bool isValidPieceSelection(int row, int col) const;
     void promotePawn(int row, int col, char promoteTo);
