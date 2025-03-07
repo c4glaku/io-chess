@@ -183,7 +183,7 @@ bool GameBoard::movePiece(int startRow, int startCol, int destRow, int destCol) 
 
     // temporarily toggle player to check if the move would leave the player in check
     std::string savedPlayer = currentPlayer;
-    currentPlayer = (currentPlayer == "White") ? "Black" : "White";
+    // currentPlayer = (currentPlayer == "White") ? "Black" : "White";
     bool wouldBeInCheck = isCheck();
     currentPlayer = savedPlayer;
 

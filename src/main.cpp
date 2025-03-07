@@ -46,13 +46,14 @@ int main() {
                 unsigned int height = event.size.height;
                 float minDimension = std::min(width, height);
 
-                // update viewposrt
-                sf::FloatRect visibleArea(0, 0, width, height);
-                window.setView(sf::View(visibleArea));
+                // update viewport
+                sf::View view = window.getView();
+                view.setSize(width, height);
+                view.setCenter(width/2.0f, height/2.0f);
+                window.setView(view);
 
                 // calculate new square size
                 squareSize = minDimension / 8.0f;
-                // boardScale = minDimension / 512.0f;
 
                 // update highlight square size
                 highlightSquare.setSize(sf::Vector2f(squareSize, squareSize));
@@ -166,9 +167,9 @@ int main() {
         float boardStartY = (window.getSize().y - boardSize) / 2.0f;
 
         // create a view for the board
-        sf::View boardView = window.getDefaultView();
-        boardView.setCenter(window.getSize().x / 2.0f, window.getSize().y / 2.0f);
-        window.setView(boardView);
+        // sf::View boardView = window.getDefaultView();
+        // boardView.setCenter(window.getSize().x / 2.0f, window.getSize().y / 2.0f);
+        // window.setView(boardView);
 
         // draw the board
         chess.draw(window, squareSize, boardStartX, boardStartY);
